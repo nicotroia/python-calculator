@@ -70,7 +70,6 @@ def test_invalid_operation(monkeypatch):
     output = run_calculator_with_input(monkeypatch, inputs)
     assert "Invalid input." in output
 
-
 def test_invalid_operation_compact(monkeypatch):
     """Test invalid operation in compact form (operator not allowed):"""
     inputs = ["5%3", "exit"]
@@ -89,7 +88,7 @@ def test_division_by_zero(monkeypatch):
     output = run_calculator_with_input(monkeypatch, inputs)
     assert "Error: division by zero" in output
 
-
+# Keyboard interrupt
 def test_keyboard_interrupt(monkeypatch):
     """Test that Ctrl+C (KeyboardInterrupt) causes the calculator to exit gracefully."""
     # Patch input to raise a KeyboardInterrupt
