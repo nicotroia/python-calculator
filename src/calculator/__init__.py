@@ -60,13 +60,10 @@ def calculator():
       result = subtract(num1, num2)
     elif operation == "*":
       result = multiply(num1, num2)
-    elif operation == "/":
+    else:
       if num2 == 0:
         print("Error: division by zero")
         continue
       result = divide(num1, num2)
-    else:
-      print(f"Unknown operation '{operation}'. Supported: + - * /")
-      continue
 
     print(f"Result: {result}")

@@ -70,6 +70,13 @@ def test_invalid_operation(monkeypatch):
     output = run_calculator_with_input(monkeypatch, inputs)
     assert "Invalid input." in output
 
+
+def test_invalid_operation_compact(monkeypatch):
+    """Test invalid operation in compact form (operator not allowed):"""
+    inputs = ["5%3", "exit"]
+    output = run_calculator_with_input(monkeypatch, inputs)
+    assert "Invalid input." in output
+
 def test_invalid_input_format(monkeypatch):
     """Test invalid input format:"""
     inputs = ["+ 2 3", "exit"]
@@ -81,3 +88,27 @@ def test_division_by_zero(monkeypatch):
     inputs = ["5 / 0", "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
     assert "Error: division by zero" in output
+
+
+def test_keyboard_interrupt(monkeypatch):
+    """Test that Ctrl+C (KeyboardInterrupt) causes the calculator to exit gracefully."""
+    # Patch input to raise a KeyboardInterrupt
+    def raise_kb(_prompt=None):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr('builtins.input', raise_kb)
+
+    # Capture stdout
+    from io import StringIO
+    import sys
+
+    captured_output = StringIO()
+    sys_stdout = sys.stdout
+    try:
+        sys.stdout = captured_output
+        calculator()
+    finally:
+        sys.stdout = sys_stdout
+
+    output = captured_output.getvalue()
+    assert "Exiting..." in output
