@@ -1,7 +1,8 @@
 """ tests/test_calculator.py """
 import sys
 from io import StringIO
-from src.calculator import calculator
+import pytest
+from src.calculator.calculator import calculator
 
 def run_calculator_with_input(monkeypatch, inputs):
     input_iterator = iter(inputs)
@@ -14,92 +15,163 @@ def run_calculator_with_input(monkeypatch, inputs):
     sys.stdout = sys.__stdout__  # Reset stdout
     return captured_output.getvalue()
 
-# Positive Tests
-def test_addition_split(monkeypatch):
-    """Test addition operation in split form:"""
-    inputs = ["2 + 3", "exit"]
+# Parameterized tests for valid operations
+@pytest.mark.parametrize(
+    "expression, expected_result",
+    [
+        ("2 + 3", "5.0"),
+        ("2+3", "5.0"),
+        ("0 + 0", "0.0"),
+        ("0+0", "0.0"),
+        ("-1 + 1", "0.0"),
+        ("-1+1", "0.0"),
+        ("2.5 + 3.5", "6.0"),
+        ("2.5+3.5", "6.0"),
+    ],
+    ids=[
+        "add_split_positive_integers",
+        "add_compact_positive_integers",
+        "add_split_zeros",
+        "add_compact_zeros",
+        "add_split_negative_and_positive",
+        "add_compact_negative_and_positive",
+        "add_split_floats",
+        "add_compact_floats",
+    ]
+)
+def test_addition(monkeypatch, expression, expected_result):
+    """Addition operations should work in both split and compact forms."""
+    inputs = [expression, "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 5.0" in output
+    assert f"Result: {expected_result}" in output
 
-def test_addition_compact(monkeypatch):
-    """Test addition operation in compact form:"""
-    inputs = ["2+3", "exit"]
+@pytest.mark.parametrize(
+    "expression, expected_result",
+    [
+        ("5 - 2", "3.0"),
+        ("5-2", "3.0"),
+        ("0 - 0", "0.0"),
+        ("0-0", "0.0"),
+        ("10 - 5", "5.0"),
+        ("10-5", "5.0"),
+        ("-5 - 3", "-8.0"),
+        ("-5-3", "-8.0"),
+    ],
+    ids=[
+        "subtract_split_positive",
+        "subtract_compact_positive",
+        "subtract_split_zeros",
+        "subtract_compact_zeros",
+        "subtract_split_larger_numbers",
+        "subtract_compact_larger_numbers",
+        "subtract_split_negative",
+        "subtract_compact_negative",
+    ]
+)
+def test_subtraction(monkeypatch, expression, expected_result):
+    """Subtraction operations should work in both split and compact forms."""
+    inputs = [expression, "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 5.0" in output
+    assert f"Result: {expected_result}" in output
 
-def test_subtraction_split(monkeypatch):
-    """Test subtraction operation in split form:"""
-    inputs = ["5 - 2", "exit"]
+@pytest.mark.parametrize(
+    "expression, expected_result",
+    [
+        ("4 * 5", "20.0"),
+        ("4*5", "20.0"),
+        ("0 * 10", "0.0"),
+        ("0*10", "0.0"),
+        ("-2 * 3", "-6.0"),
+        ("-2*3", "-6.0"),
+        ("2.5 * 4", "10.0"),
+        ("2.5*4", "10.0"),
+    ],
+    ids=[
+        "multiply_split_positive",
+        "multiply_compact_positive",
+        "multiply_split_by_zero",
+        "multiply_compact_by_zero",
+        "multiply_split_negative",
+        "multiply_compact_negative",
+        "multiply_split_float",
+        "multiply_compact_float",
+    ]
+)
+def test_multiplication(monkeypatch, expression, expected_result):
+    """Multiplication operations should work in both split and compact forms."""
+    inputs = [expression, "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 3.0" in output
+    assert f"Result: {expected_result}" in output
 
-def test_subtraction_compact(monkeypatch):
-    """Test subtraction operation in compact form:"""
-    inputs = ["5-2", "exit"]
+@pytest.mark.parametrize(
+    "expression, expected_result",
+    [
+        ("10 / 2", "5.0"),
+        ("10/2", "5.0"),
+        ("6 / 3", "2.0"),
+        ("6/3", "2.0"),
+        ("-6 / 3", "-2.0"),
+        ("-6/3", "-2.0"),
+        ("7.5 / 2.5", "3.0"),
+        ("7.5/2.5", "3.0"),
+    ],
+    ids=[
+        "divide_split_positive",
+        "divide_compact_positive",
+        "divide_split_even_division",
+        "divide_compact_even_division",
+        "divide_split_negative",
+        "divide_compact_negative",
+        "divide_split_floats",
+        "divide_compact_floats",
+    ]
+)
+def test_division(monkeypatch, expression, expected_result):
+    """Division operations should work in both split and compact forms."""
+    inputs = [expression, "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 3.0" in output
+    assert f"Result: {expected_result}" in output
 
-def test_multiplication_split(monkeypatch):
-    """Test multiplication operation:"""
-    inputs = ["4 * 5", "exit"]
-    output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 20.0" in output
-
-def test_multiplication_compact(monkeypatch):
-    """Test multiplication operation in compact form:"""
-    inputs = ["4*5", "exit"]
-    output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 20.0" in output
-
-def test_division_split(monkeypatch):
-    """Test division operation in split form:"""
-    inputs = ["10 / 2", "exit"]
-    output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 5.0" in output
-
-def test_division_compact(monkeypatch):
-    """Test division operation in compact form:"""
-    inputs = ["10/2", "exit"]
-    output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Result: 5.0" in output
-
-# Negative Tests
-def test_invalid_operation(monkeypatch):
-    """Test invalid operation:"""
-    inputs = ["5 % 3", "exit"]
-    output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Invalid input." in output
-
-def test_invalid_operation_compact(monkeypatch):
-    """Test invalid operation in compact form (operator not allowed):"""
-    inputs = ["5%3", "exit"]
-    output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Invalid input." in output
-
-def test_invalid_input_format(monkeypatch):
-    """Test invalid input format:"""
-    inputs = ["+ 2 3", "exit"]
+# Parameterized tests for invalid inputs
+@pytest.mark.parametrize(
+    "expression",
+    [
+        "5 % 3",
+        "5%3",
+        "+ 2 3",
+        "2 ^ 3",
+        "2^3",
+        "abc + 2",
+        "2 + + 3",
+    ],
+    ids=[
+        "invalid_split_modulo_operator",
+        "invalid_compact_modulo_operator",
+        "invalid_operator_first",
+        "invalid_split_power_operator",
+        "invalid_compact_power_operator",
+        "invalid_non_numeric_input",
+        "invalid_double_operator",
+    ]
+)
+def test_invalid_operations(monkeypatch, expression):
+    """Invalid operations should produce appropriate error messages."""
+    inputs = [expression, "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
     assert "Invalid input." in output
 
 def test_division_by_zero(monkeypatch):
-    """Test division by zero:"""
+    """Division by zero should produce appropriate error message."""
     inputs = ["5 / 0", "exit"]
     output = run_calculator_with_input(monkeypatch, inputs)
-    assert "Error: division by zero" in output
+    assert "Error: Division by zero is not allowed." in output
 
-# Keyboard interrupt
 def test_keyboard_interrupt(monkeypatch):
-    """Test that Ctrl+C (KeyboardInterrupt) causes the calculator to exit gracefully."""
-    # Patch input to raise a KeyboardInterrupt
+    """Ctrl+C (KeyboardInterrupt) should cause the calculator to exit gracefully."""
     def raise_kb(_prompt=None):
         raise KeyboardInterrupt
 
     monkeypatch.setattr('builtins.input', raise_kb)
-
-    # Capture stdout
-    from io import StringIO
-    import sys
 
     captured_output = StringIO()
     sys_stdout = sys.stdout
