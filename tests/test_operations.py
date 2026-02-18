@@ -1,6 +1,6 @@
 """ tests/test_helpers.py """
 import pytest
-from src.helpers.operations import Operations
+from src.operations import Operations
 
 def test_add_positive():
   """Test positive cases for add."""
@@ -47,5 +47,5 @@ def test_divide_negative():
 
 def test_divide_by_zero():
   """Test divide by zero."""
-  with pytest.raises(ValueError, match="Division by zero is not allowed."):
+  with pytest.raises(ZeroDivisionError, match="Division by zero is not allowed."):
     Operations.divide(1, 0)
