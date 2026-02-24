@@ -2,7 +2,9 @@
 import sys
 from io import StringIO
 import pytest
+from unittest.mock import patch
 from src.calculator.calculator import calculator
+from src.helpers.validators import ValidationError
 
 def run_calculator_with_input(monkeypatch, inputs):
 	input_iterator = iter(inputs)
@@ -250,6 +252,21 @@ def test_accumulator_no_previous_result(monkeypatch):
 	inputs = ["+3", "exit"]
 	output = run_calculator_with_input(monkeypatch, inputs)
 	assert "No previous result to use." in output
+
+def test_validation_error_in_full_form(monkeypatch):
+	with patch("src.calculator.calculator.InputValidator.validate_number", side_effect=ValidationError("bad")):
+		inputs = ["2+3", "exit"]
+		output = run_calculator_with_input(monkeypatch, inputs)
+	assert "Invalid input: bad" in output
+
+def test_validation_error_in_accumulator_form(monkeypatch):
+	from decimal import Decimal
+	# First two calls succeed (full form "2+3"), third raises (accumulator "+1")
+	side_effects = [Decimal("2"), Decimal("3"), ValidationError("bad")]
+	with patch("src.calculator.calculator.InputValidator.validate_number", side_effect=side_effects):
+		inputs = ["2+3", "+1", "exit"]
+		output = run_calculator_with_input(monkeypatch, inputs)
+	assert "Invalid input: bad" in output
 
 @pytest.mark.parametrize(
 	"first, short, expected",

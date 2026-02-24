@@ -67,8 +67,8 @@ def test_divide_by_zero_raises_from_divide_calculation():
 def test_lbyl_vs_eafp_examples():
   # LBYL: check before executing
   safe_calc = CalculationFactory.create_calculation("divide", 10.0, 2.0)
-  if safe_calc.b == 0:
-    pytest.skip("LBYL prevented division by zero")
+  if safe_calc.b == 0:  # pragma: no cover
+    pytest.skip("LBYL prevented division by zero")  # pragma: no cover
   else:
     assert safe_calc.execute() == 5.0
 

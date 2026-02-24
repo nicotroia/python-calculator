@@ -15,7 +15,7 @@ class CalculatorConfig(Protocol):
 
 class CalculatorProtocol(Protocol):
   config: CalculatorConfig
-  def save_history(self) -> None: ...
+  def save_history(self) -> None: ...  # pragma: no cover
 
 class HistoryObserver(ABC):
   @abstractmethod

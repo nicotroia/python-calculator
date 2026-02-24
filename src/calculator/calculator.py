@@ -2,8 +2,9 @@ import re
 import logging
 
 from src.calculations.calculations import CalculationFactory
-from src.calculations.calculation_record import CalculationRecord
+from src.helpers.calculation_record import CalculationRecord
 from src.history.history import LoggingObserver, CsvLoggingObserver
+from src.helpers.validators import InputValidator, ValidationError
 
 def calculator():
   """Basic REPL calculator that performs addition, subtraction, multiplication, division, power, and root.
@@ -65,7 +66,12 @@ def calculator():
     # Full form: '<num1> <op> <num2>'
     m = re.match(r'^([+-]?\d+(?:\.\d+)?)\s*([+\-*/^r])\s*([+-]?\d+(?:\.\d+)?)$', s)
     if m:
-      num1, num2 = float(m.group(1)), float(m.group(3))
+      try:
+        num1 = float(InputValidator.validate_number(m.group(1)))
+        num2 = float(InputValidator.validate_number(m.group(3)))
+      except ValidationError as e:
+        print(f"Invalid input: {e}")
+        continue
       operation = m.group(2)
     else:
       # Accumulator form: '<op> <num2>' — reuses last result as num1
@@ -76,8 +82,13 @@ def calculator():
       if last_result is None:
         print("No previous result to use. Please enter a full expression first.")
         continue
+      try:
+        num2 = float(InputValidator.validate_number(m2.group(2)))
+      except ValidationError as e:
+        print(f"Invalid input: {e}")
+        continue
       operation = m2.group(1)
-      num1, num2 = last_result, float(m2.group(2))
+      num1 = last_result
 
     print(f"Computing: {num1} {operation} {num2}")
 
