@@ -46,7 +46,7 @@ Omit the first number to reuse the last result:
 | `help`    | Show usage instructions                        |
 | `history` | List all calculations from the current session |
 | `exit`    | Exit the calculator                            |
-| `Ctrl+C`  | Exit immediately                               |
+| `Cmd+C`   | Exit immediately                               |
 
 ## Logs
 
