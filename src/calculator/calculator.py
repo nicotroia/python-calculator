@@ -1,8 +1,8 @@
 import re
-import datetime
 import logging
 
 from src.calculations.calculations import CalculationFactory
+from src.calculations.calculation_record import CalculationRecord
 from src.history.history import LoggingObserver, CsvLoggingObserver
 
 def calculator():
@@ -29,7 +29,7 @@ def calculator():
 
   # Keep a log of calculations performed in this session
   observers = [LoggingObserver(), CsvLoggingObserver()]
-  history: list[tuple[str, object]] = []
+  history: list[CalculationRecord] = []
   last_result: float | None = None
 
   while True:
@@ -56,8 +56,8 @@ def calculator():
       if not history:
         print("No history yet...")
       else:
-        for ts, item in history:
-          print(f"{ts}: {item}")
+        for record in history:
+          print(str(record))
       continue
 
     s = user_input.strip()
@@ -92,8 +92,7 @@ def calculator():
       print(f"Error: {e}")
       continue
 
-    ts = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    history.append((ts, calc))
+    history.append(CalculationRecord(calculation=calc))
     last_result = result
     for obs in observers:
       obs.update(calc)
