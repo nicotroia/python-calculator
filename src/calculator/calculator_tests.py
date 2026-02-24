@@ -1,8 +1,8 @@
-""" tests/test_calculator.py """
+""" src/calculator/calculator.tests.py """
 import sys
 from io import StringIO
 import pytest
-from src.calculator import calculator
+from src.calculator.calculator import calculator
 
 def run_calculator_with_input(monkeypatch, inputs):
 	input_iterator = iter(inputs)
@@ -132,6 +132,37 @@ def test_division(monkeypatch, expression, expected_result):
 	output = run_calculator_with_input(monkeypatch, inputs)
 	assert f"Result: {expected_result}" in output
 
+@pytest.mark.parametrize(
+	"expression, expected_result",
+	[
+		("2 ^ 3", "8.0"),
+		("2^3", "8.0"),
+		("3 ^ 2", "9.0"),
+		("2 ^ 0", "1.0"),
+	],
+	ids=["power_split", "power_compact", "power_split_reversed", "power_split_zero_exp"]
+)
+def test_power(monkeypatch, expression, expected_result):
+	"""Power operations should work in both split and compact forms."""
+	inputs = [expression, "exit"]
+	output = run_calculator_with_input(monkeypatch, inputs)
+	assert f"Result: {expected_result}" in output
+
+@pytest.mark.parametrize(
+	"expression, expected_result",
+	[
+		("2 r 9", "3.0"),
+		("2r9", "3.0"),
+		("3 r 8", "2.0"),
+	],
+	ids=["root_split", "root_compact", "root_split_cube"]
+)
+def test_root(monkeypatch, expression, expected_result):
+	"""Root operations should work in both split and compact forms."""
+	inputs = [expression, "exit"]
+	output = run_calculator_with_input(monkeypatch, inputs)
+	assert f"Result: {expected_result}" in output
+
 # Parameterized tests for invalid inputs
 @pytest.mark.parametrize(
 	"expression",
@@ -139,8 +170,6 @@ def test_division(monkeypatch, expression, expected_result):
 		"5 % 3",
 		"5%3",
 		"+ 2 3",
-		"2 ^ 3",
-		"2^3",
 		"abc + 2",
 		"2 + + 3",
 	],
@@ -148,8 +177,6 @@ def test_division(monkeypatch, expression, expected_result):
 		"invalid_split_modulo_operator",
 		"invalid_compact_modulo_operator",
 		"invalid_operator_first",
-		"invalid_split_power_operator",
-		"invalid_compact_power_operator",
 		"invalid_non_numeric_input",
 		"invalid_double_operator",
 	]
@@ -190,7 +217,6 @@ def test_history_shows_no_history_initially(monkeypatch):
 	output = run_calculator_with_input(monkeypatch, inputs)
 	assert "No history yet..." in output
 
-
 def test_help_and_history_and_empty_input(monkeypatch):
 	# Test help, empty input (ignored), history when empty and after one calculation
 	inputs = [
@@ -205,11 +231,11 @@ def test_help_and_history_and_empty_input(monkeypatch):
 	# Empty input should not produce 'Computing' for that entry; only one computing for 2+2
 	assert output.count("Computing:") == 1
 	# History should include the performed calculation
-	assert "AddCalculation: 2.0 Add 2.0 = 4.0" in output or "Result: 4.0" in output
+	assert "2.0 Add 2.0 = 4.0" in output or "Result: 4.0" in output
 
 def test_unexpected_exception_in_factory(monkeypatch):
 	# Force CalculationFactory.create_calculation to raise an unexpected error (EAFP demonstration)
-	import src.calculations as calcmod
+	import src.calculations.calculations as calcmod
 
 	def raise_runtime(*args, **kwargs):
 		raise RuntimeError("boom")
@@ -219,3 +245,30 @@ def test_unexpected_exception_in_factory(monkeypatch):
 	inputs = ["2+2", "exit"]
 	output = run_calculator_with_input(monkeypatch, inputs)
 	assert "Error: boom" in output
+
+def test_accumulator_no_previous_result(monkeypatch):
+	inputs = ["+3", "exit"]
+	output = run_calculator_with_input(monkeypatch, inputs)
+	assert "No previous result to use." in output
+
+@pytest.mark.parametrize(
+	"first, short, expected",
+	[
+		("2+3", "+10", "15.0"),   # 5 + 10
+		("10-4", "*3", "18.0"),   # 6 * 3
+		("3*4", "/6", "2.0"),     # 12 / 6
+		("2^3", "+0", "8.0"),     # 8 + 0
+		("4r16", "*2", "4.0"),    # 2 * 2
+	],
+	ids=["add_to_prev", "multiply_prev", "divide_prev", "power_then_add", "root_then_multiply"]
+)
+def test_accumulator_uses_last_result(monkeypatch, first, short, expected):
+	inputs = [first, short, "exit"]
+	output = run_calculator_with_input(monkeypatch, inputs)
+	assert f"Result: {expected}" in output
+
+def test_accumulator_chains_multiple_times(monkeypatch):
+	# 2+3=5, +5=10, *2=20
+	inputs = ["2+3", "+5", "*2", "exit"]
+	output = run_calculator_with_input(monkeypatch, inputs)
+	assert "Result: 20.0" in output

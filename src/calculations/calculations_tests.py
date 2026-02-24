@@ -1,10 +1,10 @@
-"""tests/test_calculations.py
+"""src/calculations/calculations.tests.py
 
 Tests for the Calculation classes and CalculationFactory
 """
 import pytest
 
-from src.calculations import (
+from src.calculations.calculations import (
   CalculationFactory,
   Calculation,
 )
@@ -16,6 +16,8 @@ from src.calculations import (
     ("subtract", 5.0, 3.0, "SubtractCalculation", 2.0),
     ("multiply", 4.0, 2.5, "MultiplyCalculation", 10.0),
     ("divide", 9.0, 3.0, "DivideCalculation", 3.0),
+    ("power", 2.0, 3.0, "PowerCalculation", 8.0),
+    ("root", 2.0, 9.0, "RootCalculation", 3.0),
   ],
 )
 def test_factory_creates_and_executes(ctype, a, b, expected_class, expected_result):
@@ -26,8 +28,8 @@ def test_factory_creates_and_executes(ctype, a, b, expected_class, expected_resu
 
 def test_str_and_repr_show_expected_values():
   calc = CalculationFactory.create_calculation("add", 2.0, 3.0)
-  # __str__ should include class name, operands and the computed result
-  assert str(calc) == "AddCalculation: 2.0 Add 3.0 = 5.0"
+  s = str(calc)
+  assert s == "2.0 Add 3.0 = 5.0"
   # __repr__ should include the class name and operand values
   assert repr(calc) == "AddCalculation(a=2.0, b=3.0)"
 

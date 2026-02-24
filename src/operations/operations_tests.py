@@ -1,6 +1,6 @@
-""" tests/test_helpers.py """
+""" src/operations/operations.tests.py """
 import pytest
-from src.operations import Operations
+from src.operations.operations import Operations
 
 def test_add_positive():
   """Test positive cases for add."""
@@ -49,3 +49,18 @@ def test_divide_by_zero():
   """Test divide by zero."""
   with pytest.raises(ZeroDivisionError, match="Division by zero is not allowed."):
     Operations.divide(1, 0)
+
+def test_power():
+  assert Operations.power(2, 3) == 8
+  assert Operations.power(3, 2) == 9
+  assert Operations.power(5, 0) == 1
+  assert Operations.power(2, -1) == 0.5
+
+def test_root():
+  assert Operations.root(2, 9) == 3.0
+  assert Operations.root(3, 8) == 2.0
+  assert Operations.root(2, 4) == 2.0
+
+def test_root_degree_zero_raises():
+  with pytest.raises(ValueError, match="Root degree cannot be zero."):
+    Operations.root(0, 9)

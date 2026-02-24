@@ -87,3 +87,6 @@ docs/_build/
 *.sublime-project
 *.sublime-workspace
 .DS_Store
+
+# App generated
+logs/
